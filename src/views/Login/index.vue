@@ -4,7 +4,7 @@
       <ul class="menu-tab">
         <li
           v-for="item in menuTab"
-          :class="{'current':item.current}"
+          :class="{ current: item.current }"
           :key="item.id"
           @click="toggleMenu(item)"
         >{{ item.value }}</li>
@@ -13,16 +13,16 @@
         <el-form
           :model="ruleForm"
           :rules="rules"
-          ref="ruleForm"
+          ref="loginForm"
           label-width="100px"
           class="login-form"
         >
           <el-form-item prop="userName" class="item-form">
-            <label>邮箱</label>
+            <label for="userName">邮箱</label>
             <el-input type="text" v-model="ruleForm.userName" clearable></el-input>
           </el-form-item>
           <el-form-item prop="password" class="item-form">
-            <label>密码</label>
+            <label for="password">密码</label>
             <el-input
               type="text"
               clearable
@@ -32,7 +32,7 @@
             ></el-input>
           </el-form-item>
           <el-form-item prop="rePassword" class="item-form" v-show="model === 'register'">
-            <label>重复密码</label>
+            <label for="rePassword">重复密码</label>
             <el-input
               type="text"
               clearable
@@ -42,18 +42,30 @@
             ></el-input>
           </el-form-item>
           <el-form-item prop="code" class="item-form">
-            <label>验证码</label>
+            <label for="code">验证码</label>
             <el-row :gutter="20">
               <el-col :span="15">
                 <el-input v-model="ruleForm.code" clearable></el-input>
               </el-col>
               <el-col :span="9">
-                <el-button type="success" class="form-btn" minlength="6" maxlength="6">获取验证码</el-button>
+                <el-button
+                  type="success"
+                  class="form-btn"
+                  minlength="6"
+                  maxlength="6"
+                  @click="getsms()"
+                  :disabled="codeBtn.status"
+                >{{codeBtn.text}}</el-button>
               </el-col>
             </el-row>
           </el-form-item>
           <el-form-item class="item-form">
-            <el-button type="danger" @click="submitForm('ruleForm')" class="form-btn margin-btn">登录</el-button>
+            <el-button
+              type="danger"
+              @click="submitForm('loginForm')"
+              class="form-btn margin-btn"
+              :disabled="loginBtnStatus"
+            >{{ model === 'login' ? '登录' : '注册'}}</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -61,13 +73,13 @@
   </div>
 </template>
 <script>
+import { GetSms, Register } from "@/api/login";
 import {
   stripscript,
   validateEmail,
   validatePassword,
   validateCode
 } from "@/utils/validate.js";
-import vali from "@/utils/http.js";
 export default {
   name: "Login",
   prop: {},
@@ -144,27 +156,93 @@ export default {
         rePassword: [{ validator: checkRePassword, trigger: "blur" }],
         code: [{ validator: checkCode, trigger: "blur" }]
       },
-      model: ""
+      model: "login",
+      loginBtnStatus: true,
+      // 验证码按钮状态
+      codeBtn: {
+        status: false,
+        text: "获取验证码"
+      },
+      timer: null
     };
   },
   created() {},
-  mounted() {
-    vali.validateEmail();
-    vali.validatePass();
-    vali.validateCode();
-  },
+  mounted() {},
   methods: {
+    // 登录注册切换
     toggleMenu(data) {
       this.model = data.type;
       this.menuTab.forEach(elem => {
         elem.current = false;
       });
       data.current = true;
+      // this.$refs["loginForm"].resetFields();
+      this.$refs.loginForm.resetFields();
     },
+    // 获取验证码倒计时
+    countDown(time) {
+      this.timer = setInterval(() => {
+        time--;
+        this.codeBtn.text = `倒计时${time}秒`;
+        if (time === 0) {
+          clearInterval(this.timer);
+          this.codeBtn.status = false;
+          this.codeBtn.text = "重新发送";
+        }
+      }, 1000);
+    },
+    // 获取验证码
+    getsms() {
+      if (this.ruleForm.userName == "") {
+        this.$message.error("邮箱不能为空");
+        return false;
+      }
+      if (!validateEmail(this.ruleForm.userName)) {
+        this.$message.error("邮箱格式有误,請重新輸入");
+        return false;
+      }
+      // 修改获取验证码状态
+      this.codeBtn.status = true;
+      this.codeBtn.text = "发送中";
+      // 请求接口
+      let param = {
+        username: this.ruleForm.userName,
+        module: this.model
+      };
+      GetSms(param)
+        .then(response => {
+          this.$message({
+            type: "success",
+            message: response.data.message
+          });
+          // 启用登录注册按钮
+          this.loginBtnStatus = false;
+          this.countDown(10);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    // 提交表单
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+          let param = {
+            username: this.ruleForm.userName,
+            module: this.model,
+            password: this.ruleForm.password,
+            code: this.ruleForm.code
+          };
+          Register(param)
+            .then(response => {
+              this.$message({
+                type: "success",
+                message: response.data.message
+              });
+            })
+            .catch(error => {
+              console.log(error);
+            });
         } else {
           console.log("error submit!!");
           return false;
