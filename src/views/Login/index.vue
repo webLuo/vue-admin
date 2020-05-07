@@ -73,7 +73,8 @@
   </div>
 </template>
 <script>
-import { GetSms, Register } from "@/api/login";
+import sha1 from "js-sha1";
+import { GetSms, Register, Login } from "@/api/login";
 import {
   stripscript,
   validateEmail,
@@ -169,6 +170,10 @@ export default {
   created() {},
   mounted() {},
   methods: {
+    /**
+     *  一个方法里面不建议做多个不同的事件，尽可能只做自己的事情
+     * 尽量把相同的事情封装在一个方法里面，通郭调用函数进行执行
+     */
     // 登录注册切换
     toggleMenu(data) {
       this.model = data.type;
@@ -176,20 +181,45 @@ export default {
         elem.current = false;
       });
       data.current = true;
+      this.resetDormData();
+      this.clearCountDown();
+    },
+    // 清除表单数据
+    resetDormData() {
       // this.$refs["loginForm"].resetFields();
       this.$refs.loginForm.resetFields();
     },
+    // 更新按钮的状态
+    updateBtnSataus(params) {
+      this.codeBtn.status = params.status;
+      this.codeBtn.text = params.text;
+    },
     // 获取验证码倒计时
     countDown(time) {
+      // 判断定时器是否存在，存在则清除
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
       this.timer = setInterval(() => {
         time--;
         this.codeBtn.text = `倒计时${time}秒`;
         if (time === 0) {
           clearInterval(this.timer);
-          this.codeBtn.status = false;
-          this.codeBtn.text = "重新发送";
+          this.updateBtnSataus({
+            status: false,
+            text: "重新发送"
+          });
         }
       }, 1000);
+    },
+    // 清除倒计时
+    clearCountDown() {
+      // 还原验证码按钮默认状态
+      this.updateBtnSataus({
+        status: false,
+        text: "获取验证码"
+      });
+      clearInterval(this.timer);
     },
     // 获取验证码
     getsms() {
@@ -202,8 +232,10 @@ export default {
         return false;
       }
       // 修改获取验证码状态
-      this.codeBtn.status = true;
-      this.codeBtn.text = "发送中";
+      this.updateBtnSataus({
+        status: true,
+        text: "发送中"
+      });
       // 请求接口
       let param = {
         username: this.ruleForm.userName,
@@ -226,28 +258,62 @@ export default {
     // 提交表单
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
+        // 表单验证通过
         if (valid) {
-          let param = {
-            username: this.ruleForm.userName,
-            module: this.model,
-            password: this.ruleForm.password,
-            code: this.ruleForm.code
-          };
-          Register(param)
-            .then(response => {
-              this.$message({
-                type: "success",
-                message: response.data.message
-              });
-            })
-            .catch(error => {
-              console.log(error);
-            });
+          // if (this.model == "login") {
+          //   this.loginSys();
+          // } else {
+          //   this.registerSys();
+          // }
+          this.model == "login" ? this.loginSys() : this.registerSys();
         } else {
           console.log("error submit!!");
           return false;
         }
       });
+    },
+    // 登录
+    loginSys() {
+      let param = {
+        username: this.ruleForm.userName,
+        // password: sha1(this.ruleForm.password),
+        password: this.ruleForm.password,
+        code: this.ruleForm.code
+      };
+      Login(param)
+        .then(response => {
+          this.$message({
+            type: "success",
+            message: response.data.message
+          });
+          this.$router.push({
+            name: "Console"
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    // 注册
+    registerSys() {
+      let param = {
+        username: this.ruleForm.userName,
+        module: this.model,
+        password: sha1(this.ruleForm.password),
+        code: this.ruleForm.code
+      };
+      Register(param)
+        .then(response => {
+          this.$message({
+            type: "success",
+            message: response.data.message
+          });
+          this.toggleMenu(this.menuTab[0]);
+          this.clearCountDown();
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };

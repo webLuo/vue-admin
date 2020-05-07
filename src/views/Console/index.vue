@@ -1,9 +1,14 @@
 <template>
-  <div></div>
+  <div>
+    <span>控制臺</span>
+  </div>
 </template>
+
 <script>
 export default {
-  name: "",
+  name: "Console",
+  prop: {},
+  watch: {},
   components: {},
   data() {
     return {};
