@@ -1,14 +1,9 @@
 <template>
-  <div>
-    <span>控制台</span>
-  </div>
+  <div>信息分类</div>
 </template>
-
 <script>
 export default {
-  name: "Console",
-  prop: {},
-  watch: {},
+  name: "InfoIndex",
   components: {},
   data() {
     return {};

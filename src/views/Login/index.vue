@@ -258,6 +258,7 @@ export default {
     // 提交表单
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
+        debugger;
         // 表单验证通过
         if (valid) {
           // if (this.model == "login") {

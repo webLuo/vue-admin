@@ -9,11 +9,22 @@ module.exports = {
   /**
    * webpack配置,see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
    **/
-  chainWebpack: config => { },
+  chainWebpack: config => {
+    const svgRule = config.module.rule("svg");
+    svgRule.uses.clear();
+    svgRule
+      .use("svg-sprite-loader")
+      .loader("svg-sprite-loader")
+      .options({
+        symbolId: "icon-[name]",
+        include: ["./src/icons"]
+      });
+  },
   configureWebpack: config => {
     config.resolve = { // 配置解析别名
       extensions: ['.js', '.json', '.vue'],
       alias: {
+        'vue': 'vue/dist/vue.js',
         '@': path.resolve(__dirname, './src'),
         // 'public': path.resolve(__dirname, './public'),
         // 'components': path.resolve(__dirname, './src/components'),
@@ -27,20 +38,21 @@ module.exports = {
   // 生产环境是否生成 sourceMap 文件
   productionSourceMap: false,
   // css相关配置
-  // css: {
-  //   // 是否使用css分离插件 ExtractTextPlugin
-  //   extract: true,
-  //   // 开启 CSS source maps?
-  //   sourceMap: false,
-  //   // css预设器配置项
-  //   loaderOptions: {
-  //     sass: {
-  //       data: `@import "./src/styles/main.scss";`
-  //     }
-  //   },
-  //   // 启用 CSS modules for all css / pre-processor files.
-  //   modules: false
-  // },
+  css: {
+    // 是否使用css分离插件 ExtractTextPlugin
+    extract: true,
+    // 开启 CSS source maps?
+    sourceMap: false,
+    // css预设器配置项
+    loaderOptions: {
+      scss: {
+        prependData: `@import "./src/styles/main.scss";`
+      }
+    },
+    // requireModuleExtension: false,
+    // 启用 CSS modules for all css / pre-processor files.
+    // modules: false
+  },
   // use thread-loader for babel & TS in production build
   // enabled by default if the machine has more than 1 cores
   parallel: require("os").cpus().length > 1,
