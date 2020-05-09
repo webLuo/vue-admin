@@ -8,6 +8,9 @@ import store from "./store";
 // 自定义全局组件
 import "./icons/index.js"
 
+// 路由守卫
+import './utils/premission'
+
 Vue.use(ElementUI);
 Vue.config.productionTip = false;
 

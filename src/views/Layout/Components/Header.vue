@@ -5,9 +5,10 @@
     </div>
     <div class="pull-right">
       <div class="header-icon user-info pull-left">
-        <svg-icon iconClass="admin" styleName="admin"></svg-icon>管理员
+        <svg-icon iconClass="admin" styleName="admin"></svg-icon>
+        {{username}}
       </div>
-      <div class="header-icon pull-left">
+      <div class="header-icon pull-left" @click="exit">
         <svg-icon iconClass="exit" styleName="exit"></svg-icon>
       </div>
     </div>
@@ -18,6 +19,11 @@
 export default {
   name: "Header",
   components: {},
+  computed: {
+    username: function() {
+      return this.$store.state.app.username;
+    }
+  },
   data() {
     return {};
   },
@@ -26,6 +32,11 @@ export default {
   methods: {
     navMenuState() {
       this.$store.commit("SET_COLLAPSE");
+    },
+    exit() {
+      this.$store.dispatch("logout").then(() => {
+        this.$router.push({ name: "Login" });
+      });
     }
   }
 };

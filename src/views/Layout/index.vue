@@ -19,7 +19,7 @@ export default {
   },
   computed: {
     menuStatus: function() {
-      return this.$store.state.isCollapse;
+      return this.$store.state.app.isCollapse;
     }
   },
   data() {

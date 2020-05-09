@@ -74,7 +74,7 @@
 </template>
 <script>
 import sha1 from "js-sha1";
-import { GetSms, Register, Login } from "@/api/login";
+import { GetSms, Register } from "@/api/login";
 import {
   stripscript,
   validateEmail,
@@ -258,7 +258,6 @@ export default {
     // 提交表单
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
-        debugger;
         // 表单验证通过
         if (valid) {
           // if (this.model == "login") {
@@ -281,7 +280,8 @@ export default {
         password: this.ruleForm.password,
         code: this.ruleForm.code
       };
-      Login(param)
+      this.$store
+        .dispatch("login", param)
         .then(response => {
           this.$message({
             type: "success",

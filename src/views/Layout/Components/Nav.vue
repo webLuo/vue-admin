@@ -7,7 +7,7 @@
       default-active="1-4-1"
       class="navMenu"
       :collapse="isCollapse"
-      background-color="transparent"
+      background-color="#344a5f"
       text-color="#fff"
       active-text-color="#fff"
       router
@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     isCollapse: function() {
-      return this.$store.state.isCollapse;
+      return this.$store.state.app.isCollapse;
     }
   },
   mounted() {
@@ -56,7 +56,8 @@ export default {
   text-align: center;
   margin: 10px;
   img {
-    width: 40px;
+    width: 80px;
+    @include webkit(transition, all 0.2s ease 0s);
   }
 }
 #nav-wrap {
@@ -83,6 +84,9 @@ export default {
 .close {
   #nav-wrap {
     width: $navMenuMin;
+    .logo img {
+      width: 60%;
+    }
   }
 }
 </style>
