@@ -61,7 +61,7 @@ export default {
   }
 }
 #nav-wrap {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: $navMenu;

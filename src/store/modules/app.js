@@ -3,7 +3,7 @@ import { Login } from "@/api/login";
 import { setToken, setUserName, getUserName, removeToken, removeUserName } from '@/utils/app';
 const app = {
   state: {
-    isCollapse: JSON.parse(sessionStorage.getItem('isCollapse')) || false,
+    isCollapse: false || JSON.parse(sessionStorage.getItem('isCollapse')),
     // isCollapse: JSON.parse(localStorage.getItem('isCollapse')) || false
     // isCollapse: JSON.parse(cookie.get('isCollapse')) || false
     token: '',

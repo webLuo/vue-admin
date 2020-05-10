@@ -1,5 +1,6 @@
 import axios from "axios";
-import { Message } from 'element-ui'
+import { Message } from "element-ui"
+import { getToken, getUserName } from "./app"
 
 // 创建axios，赋给变量service
 // A总接口-http://www.web-jshtml.cn/productapi
@@ -19,7 +20,9 @@ service.interceptors.request.use(
   function (config) {
     // 在发送请求之前做些什么
     // token userId ...... 在请求头添加后台需要前端添加的参数
-    // config.header['Token'] = 'xxx'
+    // config.headers['Token'] = 'xxx'
+    config.headers['Tokey'] = getToken();
+    config.headers['UserName'] = getUserName();
     return config;
   },
   function (error) {
