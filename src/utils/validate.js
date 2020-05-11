@@ -37,6 +37,34 @@ export function validateCode(value) {
 }
 
 /**
+ * 验证标题
+ */
+export function validateTitle(rule, value, callback) {
+  let reg = /^[a-zA-Z0-9\u4e00-\u9fa5]+$/;
+  if (value === '') {
+    callback(new Error('请输入标题！'));
+  } else if (!reg.test(value)) {
+    callback(new Error('只能输入数字字母和汉字'));
+  } else {
+    callback()
+  }
+}
+
+/**
+ * 验证内容
+ */
+export function validateContent(rule, value, callback) {
+  let reg = /^[a-zA-Z0-9\u4e00-\u9fa5\,，.。！!?？：:;；‘’""''“”、]+$/;
+  if (value === '') {
+    callback(new Error('请输入内容！'));
+  } else if (!reg.test(value)) {
+    callback(new Error('只能输入数字字母和汉字以及常用符号'));
+  } else {
+    callback()
+  }
+}
+
+/**
  * 未使用default，可以同时声明多个export
  * 文件import需要使用花括号
  */

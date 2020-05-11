@@ -27,7 +27,9 @@
           </div>
         </el-col>
         <el-col :span="14">
-          <h4 class="menu-title">{{rank}}分类编辑</h4>
+          <h4
+            class="menu-title"
+          >{{rank}}{{ infoModel == "addInfo" ? "新增分类" : infoModel == "editInfo" ? "分类编辑" : "请选择新增或者编辑"}}</h4>
           <div v-if="!showForm">
             <h4 class="content-title">请选择分类</h4>
           </div>
@@ -65,32 +67,7 @@ export default {
   components: {},
   data() {
     return {
-      categoryData: [
-        {
-          id: "1",
-          category_name: "国际信息",
-          children: [
-            {
-              id: "2",
-              category_name: "学习会员"
-            },
-            {
-              id: "3",
-              category_name: "学习成员"
-            }
-          ]
-        },
-        {
-          id: "4",
-          category_name: "国内信息",
-          children: [
-            {
-              id: "5",
-              category_name: "学习成员"
-            }
-          ]
-        }
-      ],
+      categoryData: [],
       formData: {
         categoryName: "",
         secCategoryName: ""
@@ -99,63 +76,112 @@ export default {
       category_second: false,
       submit_loading: false,
       showForm: false,
-      rank: ""
+      rank: "",
+      infoModel: "",
+      editParentData: null
     };
   },
   created() {},
   mounted() {
-    this.getCategoryData();
+    // 在actions触发后期更好维护
+    // this.getCategoryData();
+    this.$store
+      .dispatch("getCategoryData")
+      .then(res => {
+        this.categoryData = res.data.data.data;
+      })
+      .catch(err => {});
   },
   methods: {
-    getCategoryData() {
-      GetCategory({})
-        .then(res => {
-          this.categoryData = res.data.data.data;
-        })
-        .catch(err => {});
-    },
+    // 获取分类数据
+    // getCategoryData() {
+    //   GetCategory({})
+    //     .then(res => {
+    //       this.categoryData = res.data.data.data;
+    //     })
+    //     .catch(err => {});
+    // },
     addfirst() {
       this.category_first = true;
       this.category_second = false;
       this.showForm = true;
+      this.infoModel = "addInfo";
     },
     submitForm(formName) {
       if (!this.formData.categoryName) {
         this.$message.error("分类名称不能为空");
       } else {
-        let param = {
-          categoryName: this.formData.categoryName
-        };
         this.submit_loading = true;
-        AddfirstCategoty(param)
-          .then(res => {
-            let data = res.data;
-            if (data.resCode === 0) {
-              this.$message({
-                message: data.message,
-                type: "success"
-              });
-              // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
-              this.categoryData.push(res.data.data);
-              // this.getCategoryData();
-            }
-            this.submit_loading = false;
-            this.$refs.categoryForm.resetFields();
-          })
-          .catch(err => {
-            this.submit_loading = false;
-            this.$refs.categoryForm.resetFields();
-          });
+        debugger;
+        if (this.infoModel === "addInfo") {
+          let param = {
+            categoryName: this.formData.categoryName
+          };
+          this.addCategotyParent(param);
+        } else if (this.infoModel === "editInfo") {
+          let param = {
+            categoryName: this.formData.categoryName,
+            id: this.editParentData.id
+          };
+          this.editCategotyParent(param);
+        }
       }
+    },
+    addCategotyParent(param) {
+      AddfirstCategoty(param)
+        .then(res => {
+          let data = res.data;
+          if (data.resCode === 0) {
+            this.$message({
+              message: data.message,
+              type: "success"
+            });
+            // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
+            this.categoryData.push(res.data.data);
+            // this.getCategoryData();
+          }
+          this.submit_loading = false;
+          this.$refs.categoryForm.resetFields();
+        })
+        .catch(err => {
+          this.submit_loading = false;
+          this.$refs.categoryForm.resetFields();
+        });
+    },
+    editCategotyParent(param) {
+      EditCategory(param)
+        .then(res => {
+          let data = res.data;
+          if (data.resCode === 0) {
+            this.$message({
+              message: data.message,
+              type: "success"
+            });
+            // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
+            let index = this.categoryData.findIndex(item => item.id == data.id);
+            this.categoryData.splice(index, 1, {
+              category_name: data.data.data.categoryName,
+              id: param.id
+            });
+            // this.getCategoryData();
+          }
+          this.submit_loading = false;
+          this.$refs.categoryForm.resetFields();
+          this.formData.categoryName = "";
+          this.rank = data.data.data.categoryName;
+        })
+        .catch(err => {
+          this.submit_loading = false;
+          this.$refs.categoryForm.resetFields();
+        });
     },
     // 编辑父节点
     categoryEdit(data) {
+      this.showForm = true;
       this.rank = data.category_name;
       this.formData.categoryName = data.category_name;
-      let param = {
-        id: data.id,
-        categoryName: ""
-      };
+      this.editParentData = data;
+      this.infoModel = "editInfo";
     },
     // 确定删除
     confirmDel(data) {
@@ -210,8 +236,8 @@ export default {
 }
 .content-title {
   text-align: center;
-  background: #cb63d4;
-  line-height: 50px;
+  background: #f56c6c;
+  line-height: 100px;
   color: #fff;
   font-size: 20px;
 }

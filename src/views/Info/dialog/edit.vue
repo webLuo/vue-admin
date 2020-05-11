@@ -1,8 +1,14 @@
 <template>
   <div>
-    <el-dialog title="新增" :visible.sync="dialogVisiable" @close="closeDialog" width="550px">
-      <el-form :model="form" :rules="rules" ref="addInfoForm">
-        <el-form-item label="类型：" prop="category" :label-width="formLabelWidth" ref="addInfoForm">
+    <el-dialog
+      title="编辑"
+      :visible.sync="dialogVisiable"
+      @close="closeDialog"
+      width="550px"
+      @opened="openedDialog"
+    >
+      <el-form :model="form" :rules="rules" ref="EditInfoForm">
+        <el-form-item label="类型：" prop="category" :label-width="formLabelWidth" ref="EditInfoForm">
           <el-select v-model="form.category" placeholder="请选择">
             <el-option
               v-for="item in categoryData"
@@ -27,7 +33,7 @@
   </div>
 </template>
 <script>
-import { AddInfo } from "@/api/info";
+import { EditInfo, GetInfoList } from "@/api/info";
 import { validateTitle, validateContent } from "@/utils/validate";
 export default {
   name: "dialogInfo",
@@ -41,19 +47,27 @@ export default {
     categoryData: {
       type: Array,
       default: () => []
+    },
+    editInfo: {
+      type: Object
     }
   },
   watch: {
     flag: {
       handler(newVal, oldVal) {
         this.dialogVisiable = newVal;
-        console.log(newVal);
+      }
+    },
+    editInfo: {
+      handler(newVal, oldVal) {
+        this.editInfoRow = newVal;
       }
     }
   },
   data() {
     return {
       dialogVisiable: false,
+      editInfoRow: null,
       form: {
         category: "",
         title: "",
@@ -89,23 +103,44 @@ export default {
   created() {},
   mounted() {},
   methods: {
+    openedDialog() {
+      this.getList();
+    },
+    getList() {
+      let params = {
+        pageNumber: 1,
+        pageSize: 1,
+        id: this.editInfoRow.id
+      };
+      GetInfoList(params)
+        .then(res => {
+          let data = res.data.data.data[0];
+          this.form = {
+            category: data.categoryId,
+            title: data.title,
+            content: data.content
+          };
+        })
+        .catch(err => {});
+    },
     closeDialog() {
       this.dialogVisiable = false;
       // 父组件属性.sync
       // this.$emit("update:flag", false);
       // 回调时候需要逻辑处理的时候，就不能用修饰器，反之，可以用修饰器
-      this.$emit("close", false);
+      this.$emit("closeEdit", false);
     },
     submit() {
       this.submit_loading = true;
-      this.$refs.addInfoForm.validate(valid => {
+      this.$refs.EditInfoForm.validate(valid => {
         if (valid) {
           let params = {
-            category: this.form.category,
+            id: this.editInfoRow.id,
+            categoryId: this.form.category,
             title: this.form.title,
             content: this.form.content
           };
-          AddInfo(params)
+          EditInfo(params)
             .then(res => {
               this.$message({
                 type: "success",
@@ -113,12 +148,12 @@ export default {
               });
               this.submit_loading = false;
               this.dialogVisiable = false;
-              this.$refs.addInfoForm.resetFields();
+              this.$refs.EditInfoForm.resetFields();
             })
             .catch(err => {
               this.submit_loading = false;
               this.dialogVisiable = false;
-              this.$refs.addInfoForm.resetFields();
+              this.$refs.EditInfoForm.resetFields();
             });
         } else {
           console.log("error submit!!");

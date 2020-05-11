@@ -53,8 +53,7 @@ const app = {
         resolve()
       })
     }
-  },
-  modules: {}
+  }
 }
 
 export default app;
