@@ -77,6 +77,14 @@ module.exports = {
           '^/devApi': '/'
         }
       },
+      // 代理node服务
+      '/nodeServer': {  // api服务器地址
+        target: "http://127.0.0.1:8090",
+        changeOrigin: true,
+        pathRewrite: {
+          '^/nodeServer': '/'
+        }
+      },
     },
     overlay: {
       // 全屏模式下是否显示脚本错误

@@ -1,26 +1,31 @@
 <template>
   <div id="category">
-    <el-button type="danger" @click="addfirst">添加一级分类</el-button>
+    <el-button type="danger" @click="addParent">添加一级分类</el-button>
     <hr class="hr-style" />
     <div>
       <el-row>
         <el-col :span="10">
-          <div class="category" v-for="firstItem in categoryData" :key="firstItem.id">
+          <div class="category" v-for="parentItem in categoryData" :key="parentItem.id">
             <h4>
               <svg-icon iconClass="plus" styleName="plus" />
-              {{firstItem.category_name}}
+              {{parentItem.category_name}}
               <div class="btn-group">
-                <el-button size="mini" round type="danger" @click="categoryEdit(firstItem)">编辑</el-button>
-                <el-button size="mini" round type="success">添加子级</el-button>
-                <el-button size="mini" round @click="categoryDelete(firstItem)">删除</el-button>
+                <el-button size="mini" round type="danger" @click="categoryEdit(parentItem)">编辑</el-button>
+                <el-button size="mini" round type="success" @click="addChildren(parentItem)">添加子级</el-button>
+                <el-button size="mini" round @click="categoryDelete(parentItem)">删除</el-button>
               </div>
             </h4>
-            <ul v-if="firstItem.children">
-              <li v-for="secondItem in firstItem.children" :key="secondItem.id">
-                {{secondItem.category_name}}
+            <ul v-if="parentItem.children">
+              <li v-for="childrenItem in parentItem.children" :key="childrenItem.id">
+                {{childrenItem.category_name}}
                 <div class="btn-group">
-                  <el-button size="mini" round type="danger">编辑</el-button>
-                  <el-button size="mini" round>删除</el-button>
+                  <el-button
+                    size="mini"
+                    round
+                    type="danger"
+                    @click="categoryChildrenEdit(parentItem, childrenItem)"
+                  >编辑</el-button>
+                  <el-button size="mini" round @click="categoryDelete(childrenItem)">删除</el-button>
                 </div>
               </li>
             </ul>
@@ -29,17 +34,17 @@
         <el-col :span="14">
           <h4
             class="menu-title"
-          >{{rank}}{{ infoModel == "addInfo" ? "新增分类" : infoModel == "editInfo" ? "分类编辑" : "请选择新增或者编辑"}}</h4>
+          >{{rank}}{{ infoModel == "addInfo" ? "新增分类" : infoModel == "editInfo" ? "分类编辑": infoModel == "addChildInfo" ? "新增子级分类" : infoModel == "editChildInfo" ? "编辑子级分类" : "请选择新增或者编辑"}}</h4>
           <div v-if="!showForm">
             <h4 class="content-title">请选择分类</h4>
           </div>
           <div v-else>
             <el-form label-width="120px" :model="formData" ref="categoryForm" class="form-width">
-              <el-form-item label="一级分类名称：" prop="categoryName" v-if="category_first">
-                <el-input v-model="formData.categoryName"></el-input>
+              <el-form-item label="一级分类名称：" prop="categoryName" v-if="category_parent">
+                <el-input v-model="formData.categoryName" :disabled="parent_disabled"></el-input>
               </el-form-item>
-              <el-form-item label="二级分类名称：" prop="secCategoryName" v-if="category_second">
-                <el-input v-model="formData.secCategoryName"></el-input>
+              <el-form-item label="二级分类名称：" prop="secCategoryName" v-if="category_children">
+                <el-input v-model="formData.secCategoryName" :disabled="children_disabled"></el-input>
               </el-form-item>
               <el-form-item>
                 <el-button
@@ -59,9 +64,12 @@
 import {
   AddfirstCategoty,
   GetCategory,
+  GetCategoryAll,
   EditCategory,
-  DeleteCategory
+  DeleteCategory,
+  AddChildrenCategory
 } from "@/api/info";
+import { getInfoCategoryAll } from "@/api/common";
 export default {
   name: "InfoCategory",
   components: {},
@@ -72,27 +80,39 @@ export default {
         categoryName: "",
         secCategoryName: ""
       },
-      category_first: true,
-      category_second: false,
+      category_parent: true,
+      category_children: false,
       submit_loading: false,
       showForm: false,
       rank: "",
       infoModel: "",
-      editParentData: null
+      parentData: null,
+      parent_disabled: true,
+      children_disabled: true
     };
   },
   created() {},
   mounted() {
     // 在actions触发后期更好维护
     // this.getCategoryData();
-    this.$store
-      .dispatch("getCategoryData")
-      .then(res => {
-        this.categoryData = res.data.data.data;
-      })
-      .catch(err => {});
+    // 只加载了父级
+    // this.$store
+    //   .dispatch("getCategoryData")
+    //   .then(res => {
+    //     this.categoryData = res.data.data.data;
+    //   })
+    //   .catch(err => {});
+    this.getAllCategoryInfo();
   },
   methods: {
+    getAllCategoryInfo() {
+      // 获取所有分类数据
+      getInfoCategoryAll()
+        .then(res => {
+          this.categoryData = res.data.data;
+        })
+        .catch(err => {});
+    },
     // 获取分类数据
     // getCategoryData() {
     //   GetCategory({})
@@ -101,32 +121,72 @@ export default {
     //     })
     //     .catch(err => {});
     // },
-    addfirst() {
-      this.category_first = true;
-      this.category_second = false;
+    // 添加父节点
+    addParent() {
+      // 输入框是否显示
+      this.category_parent = true;
+      this.category_children = false;
+      // 输入框是否禁用
+      this.parent_disabled = false;
+      this.rank = "";
+      this.formData.categoryName = "";
       this.showForm = true;
       this.infoModel = "addInfo";
     },
+    // 添加子节点
+    addChildren(data) {
+      // 输入框是否显示
+      this.category_parent = true;
+      this.category_children = true;
+      // 输入框是否禁用
+      this.parent_disabled = true;
+      this.children_disabled = false;
+      // 显示表单
+      this.showForm = true;
+      this.rank = data.category_name;
+      this.formData.categoryName = data.category_name;
+      this.formData.secCategoryName = "";
+      this.parentData = data;
+      this.infoModel = "addChildInfo";
+    },
+    // 添加节点表单提交
     submitForm(formName) {
       if (!this.formData.categoryName) {
         this.$message.error("分类名称不能为空");
       } else {
         this.submit_loading = true;
-        debugger;
         if (this.infoModel === "addInfo") {
           let param = {
             categoryName: this.formData.categoryName
           };
           this.addCategotyParent(param);
-        } else if (this.infoModel === "editInfo") {
-          let param = {
-            categoryName: this.formData.categoryName,
-            id: this.editParentData.id
-          };
+        } else if (
+          this.infoModel === "editInfo" ||
+          this.infoModel === "editChildInfo"
+        ) {
+          let param = {};
+          if (this.infoModel === "editInfo") {
+            param = {
+              categoryName: this.formData.categoryName,
+              id: this.parentData.id
+            };
+          } else if (this.infoModel === "editChildInfo") {
+            param = {
+              categoryName: this.formData.secCategoryName,
+              id: this.parentData.id
+            };
+          }
           this.editCategotyParent(param);
+        } else if (this.infoModel === "addChildInfo") {
+          let param = {
+            categoryName: this.formData.secCategoryName,
+            parentId: this.parentData.id
+          };
+          this.addCategotyChildren(param);
         }
       }
     },
+    // 添加父节点接口
     addCategotyParent(param) {
       AddfirstCategoty(param)
         .then(res => {
@@ -148,6 +208,7 @@ export default {
           this.$refs.categoryForm.resetFields();
         });
     },
+    // 编辑父节点接口
     editCategotyParent(param) {
       EditCategory(param)
         .then(res => {
@@ -158,42 +219,93 @@ export default {
               type: "success"
             });
             // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
-            let index = this.categoryData.findIndex(item => item.id == data.id);
-            this.categoryData.splice(index, 1, {
-              category_name: data.data.data.categoryName,
-              id: param.id
-            });
+            // let index = this.categoryData.findIndex(
+            //   item => item.id == param.id
+            // );
+            // this.categoryData.splice(index, 1, {
+            //   category_name: data.data.data.categoryName,
+            //   id: param.id
+            // });
             // this.getCategoryData();
+            this.getAllCategoryInfo();
           }
           this.submit_loading = false;
-          this.$refs.categoryForm.resetFields();
-          this.formData.categoryName = "";
+          if (this.infoModel === "editInfo") {
+            this.formData.categoryName = "";
+          } else if (this.infoModel === "editChildInfo") {
+            this.formData.secCategoryName = "";
+          }
           this.rank = data.data.data.categoryName;
+        })
+        .catch(err => {
+          this.submit_loading = false;
+        });
+    },
+    // 编辑父节点
+    categoryEdit(data) {
+      this.parent_disabled = false;
+      this.category_children = false;
+      this.showForm = true;
+      this.rank = data.category_name;
+      this.formData.categoryName = data.category_name;
+      this.parentData = data;
+      this.infoModel = "editInfo";
+    },
+    // 编辑子节点
+    categoryChildrenEdit(parentData, childData) {
+      this.parent_disabled = true;
+      this.children_disabled = false;
+      this.category_parent = true;
+      this.category_children = true;
+      this.showForm = true;
+      this.rank = childData.category_name;
+      this.formData.categoryName = parentData.category_name;
+      this.formData.secCategoryName = childData.category_name;
+      this.parentData = childData;
+      this.infoModel = "editChildInfo";
+    },
+    // 删除分类父节点
+    categoryDelete(data) {
+      this.messageBoxFun({
+        tip: "提示",
+        content: "确认删除当前信息,确认后无法恢复！",
+        tipType: "warning",
+        confirmFun: this.confirmDel,
+        cancelFun: this.cancelDel,
+        handleData: data
+      });
+    },
+    // 添加子节点接口
+    addCategotyChildren(param) {
+      AddChildrenCategory(param)
+        .then(res => {
+          let data = res.data;
+          if (data.resCode === 0) {
+            this.$message({
+              message: data.message,
+              type: "success"
+            });
+            // this.getCategoryData();
+            this.getAllCategoryInfo();
+          }
+          this.submit_loading = false;
+          this.formData.secCategoryName = "";
         })
         .catch(err => {
           this.submit_loading = false;
           this.$refs.categoryForm.resetFields();
         });
     },
-    // 编辑父节点
-    categoryEdit(data) {
-      this.showForm = true;
-      this.rank = data.category_name;
-      this.formData.categoryName = data.category_name;
-      this.editParentData = data;
-      this.infoModel = "editInfo";
-    },
     // 确定删除
     confirmDel(data) {
       DeleteCategory({ categoryId: data.id })
         .then(res => {
-          /**
-           * es6 查找数组某一项索引位置
-           */
-          // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
-          let index = this.categoryData.findIndex(item => item.id == data.id);
-          this.categoryData.splice(index, 1);
+          // es6 查找数组某一项索引位置
+          // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式，添加子级后不可用
+          // let index = this.categoryData.findIndex(item => item.id == data.id);
+          // this.categoryData.splice(index, 1);
           // this.getCategoryData();
+          this.getAllCategoryInfo();
           this.$message({
             message: res.data.message,
             type: "success"
@@ -206,17 +318,6 @@ export default {
       this.$message({
         message: "取消删除",
         type: "info"
-      });
-    },
-    // 删除分类父节点
-    categoryDelete(data) {
-      this.messageBoxFun({
-        tip: "提示",
-        content: "确认删除当前信息,确认后无法恢复！",
-        tipType: "warning",
-        confirmFun: this.confirmDel,
-        cancelFun: this.cancelDel,
-        handleData: data
       });
     }
   }

@@ -22,6 +22,17 @@ export function GetCategory(data) {
 }
 
 /**
+ * 获取分类信息数据接口
+ */
+export function GetCategoryAll(data) {
+  return service.request({
+    method: 'post',
+    url: '/news/getCategoryAll/',
+    data
+  })
+}
+
+/**
  * 编辑分类信息数据接口
  */
 export function EditCategory(data) {
@@ -84,6 +95,17 @@ export function GetInfoList(data) {
   return service.request({
     method: 'post',
     url: '/news/getList/',
+    data
+  })
+}
+
+/**
+ * 添加分类子级接口
+ */
+export function AddChildrenCategory(data) {
+  return service.request({
+    method: 'post',
+    url: '/news/addChildrenCategory/',
     data
   })
 }
