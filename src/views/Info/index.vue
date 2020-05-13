@@ -82,10 +82,15 @@
       ></el-table-column>
       <el-table-column align="center" prop="user" label="管理员" width="115"></el-table-column>
       <el-table-column align="center" prop="createDate" label="日期" width="237" :formatter="toDate"></el-table-column>
-      <el-table-column align="center" label="操作" width="150">
+      <!-- <el-table-column align="center" prop="content" label="内容"></el-table-column> -->
+      <el-table-column align="center" label="操作" width="250">
         <template slot-scope="scope">
           <el-button type="danger" size="mini" @click="deleteRow(scope.row)">删除</el-button>
           <el-button type="success" size="mini" @click="editRow(scope.row)">编辑</el-button>
+          <!-- <router-link :to="{ name: 'InfoDetail', query: {id: scope.row.id}}">
+            <el-button type="success" size="mini">编辑详情</el-button>
+          </router-link>-->
+          <el-button type="success" size="mini" @click="editDetailRow(scope.row)">编辑详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -287,6 +292,63 @@ export default {
     editRow(rowData) {
       this.dialog_info_edit = true;
       this.editInfoRow = rowData;
+    },
+    // 编辑详情
+    editDetailRow(rowData) {
+      // 4.通过vuex 存储传参
+      // this.$store.commit("info/SET_ID", rowData.id);
+      // this.$store.commit("info/SET_TITLE", rowData.title);
+      this.$store.commit("info/UPDATE_STATE_VALUE", {
+        id: {
+          value: rowData.id,
+          sessionKey: "infoId",
+          session: true
+        },
+        title: {
+          value: rowData.title,
+          sessionKey: "infoTitle"
+        }
+      });
+      this.$router.push({
+        // name跳转可以使用params和query path跳转只能实用query
+        // name: "InfoDetail",
+        // 1.页面刷新参数不丢失，但是参数会在地址栏显示
+        // query: {
+        //   id: rowData.id
+        // }
+        // 2.参数在地址栏不显示，但是刷新后页面参数会丢失
+        // params: {
+        //   id: rowData.id
+        // }
+        // 3.在路由通过冒号传参，这里不能传对象，无法获取，只能传字符串，页面刷新参数不丢失，但是需要一一去配置，参数显示在路径中
+        // {
+        //   path: "/infoDetail/:id/:title",
+        //   name: "InfoDetail",
+        //   hidden: true,
+        //   component: () => import("@/views/Info/infoDetail.vue"),
+        //   meta: {
+        //     name: '信息详情'
+        //   }
+        // }
+        // path: `/infoDetail/${rowData}`
+        name: "InfoDetail",
+        params: {
+          id: rowData.id,
+          title: rowData.title
+        }
+      });
+      // 5.新窗口打开，参数不显示
+      // html
+      // <touter-link target="_blank" :to='{name:"InfoDetail",params:{id: rowData.id},query{id: rowData.id}}'>跳转</router>
+      // JS 需要使用query传值，不能传递对象
+      // let routeData = this.$router.resolve({
+      //   name: "InfoDetail",
+      //   query: {
+      //     id: rowData.id,
+      //     title: rowData.title
+      //   }
+      // });
+      // window.open(routeData.href, "_blank");
     },
     // 关闭新增弹框
     close() {

@@ -1,8 +1,10 @@
 <template>
   <div id="main-wrap">
-    <div class="content">
-      <router-view />
-    </div>
+    <el-scrollbar style="height:100%">
+      <div class="content">
+        <router-view />
+      </div>
+    </el-scrollbar>
   </div>
 </template>
 
@@ -26,7 +28,7 @@ export default {
   left: $navMenu;
   right: 0;
   bottom: 0;
-  height: 100%;
+  // height: 100%;
   background: #fff;
   margin: 10px 10px 0 10px;
   @include webkit("transition", all 0.3s ease 0s);
