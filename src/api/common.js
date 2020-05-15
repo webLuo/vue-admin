@@ -25,7 +25,7 @@ export function getInfoCategoryAll() {
 
 // 获取七牛云的token
 export function GetQiniuToken(data) {
-  service.request({
+  return service.request({
     method: "post",
     url: "/uploadImgToken/",
     data
