@@ -1,6 +1,6 @@
 <template>
   <div id="main-wrap">
-    <el-scrollbar style="height:100%">
+    <el-scrollbar style="height:100%;overflow-y:auto;">
       <div class="content">
         <router-view />
       </div>
