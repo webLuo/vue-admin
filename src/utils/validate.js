@@ -41,13 +41,16 @@ export function validateCode(value) {
  */
 export function validateUserName(rule, value, callback) {
   let reg = /^([a-zA-Z]|[0-9])(\w|-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
-  if (value === '') {
-    callback(new Error('请输入邮箱！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('用户名格式错误'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('用户名格式错误'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
+
 }
 
 /**
@@ -55,13 +58,16 @@ export function validateUserName(rule, value, callback) {
  */
 export function validateTrueName(rule, value, callback) {
   let reg = /^[a-zA-Z0-9\u4e00-\u9fa5]{2,8}$/;
-  if (value === '') {
-    callback(new Error('请输入姓名！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('姓名为2-8位中文或字母'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('姓名为2-8位中文或字母'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
+
 }
 
 /**
@@ -69,10 +75,12 @@ export function validateTrueName(rule, value, callback) {
  */
 export function validateUserPassword(rule, value, callback) {
   let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
-  if (value === '') {
-    callback(new Error('请输入密码！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('密码为6-20位数字加字母'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('密码为6-20位数字加字母'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
@@ -83,10 +91,12 @@ export function validateUserPassword(rule, value, callback) {
  */
 export function validatePhone(rule, value, callback) {
   let reg = /^1[3456789]\d{9}$/;
-  if (value === '') {
-    callback(new Error('请输入手机号码！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('手机号码为11位数字'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('手机号码为11位数字'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
@@ -97,13 +107,16 @@ export function validatePhone(rule, value, callback) {
  */
 export function validateTitle(rule, value, callback) {
   let reg = /^[a-zA-Z0-9\u4e00-\u9fa5]+$/;
-  if (value === '') {
-    callback(new Error('请输入标题！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('只能输入数字字母和汉字'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('只能输入数字字母和汉字'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
+
 }
 
 /**
@@ -111,13 +124,16 @@ export function validateTitle(rule, value, callback) {
  */
 export function validateContent(rule, value, callback) {
   let reg = /^[a-zA-Z0-9\u4e00-\u9fa5\,，.。！!?？：:;；‘’""''“”、]+$/;
-  if (value === '') {
-    callback(new Error('请输入内容！'));
-  } else if (!reg.test(value)) {
-    callback(new Error('只能输入数字字母和汉字以及常用符号'));
+  if (value) {
+    if (!reg.test(value)) {
+      callback(new Error('只能输入数字字母和汉字以及常用符号'));
+    } else {
+      callback()
+    }
   } else {
     callback()
   }
+
 }
 
 /**

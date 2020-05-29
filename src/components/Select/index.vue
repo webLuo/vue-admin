@@ -1,6 +1,12 @@
 <template>
   <div>
-    <el-select v-model="selectValue" placeholder="请选择" style="width:100%;" clearable>
+    <el-select
+      v-model="selectValue"
+      placeholder="请选择"
+      style="width:100%;"
+      clearable
+      @change="selectChange"
+    >
       <el-option
         v-for="item in initOption"
         :key="item.value"
@@ -18,6 +24,10 @@ export default {
     config: {
       type: Array,
       default: () => []
+    },
+    selectData: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
@@ -64,6 +74,12 @@ export default {
       this.initOption = optionArr;
       // 初始化搜索类型
       this.selectValue = optionArr[0].value;
+    },
+    // 选择后触发
+    selectChange(val) {
+      console.log(val);
+      let selData = this.options.filter(item => item.value == val)[0];
+      this.$emit("update:selectData", selData);
     }
   }
 };

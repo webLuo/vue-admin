@@ -20,7 +20,7 @@
         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
           <el-input v-model.number="form.phone" autocomplete="off" placeholder="请输入内容"></el-input>
         </el-form-item>
-        <el-form-item label="地区：" prop="userName" :label-width="formLabelWidth">
+        <el-form-item label="地区：" prop="region" :label-width="formLabelWidth">
           <CityPicker
             :regionPickerLevel="['province', 'city', 'area', 'street']"
             :cityPickerData.sync="cityPickerData"
@@ -28,8 +28,8 @@
           {{cityPickerData}}
         </el-form-item>
         <el-form-item label="是否启用：" prop="status" :label-width="formLabelWidth">
-          <el-radio v-model="form.status" label="0">禁用</el-radio>
-          <el-radio v-model="form.status" label="1">启用</el-radio>
+          <el-radio v-model="form.status" label="1">禁用</el-radio>
+          <el-radio v-model="form.status" label="2">启用</el-radio>
         </el-form-item>
         <el-form-item label="角色：" prop="role" :label-width="formLabelWidth">
           <el-checkbox-group v-model="form.role">
@@ -45,13 +45,14 @@
   </div>
 </template>
 <script>
+import sha1 from "js-sha1";
 import {
   validateUserName,
   validateTrueName,
   validateUserPassword
 } from "@/utils/validate";
 import CityPicker from "components/CityPicker";
-import { GetRole, AddUser } from "@/api/user";
+import { GetRole, AddUser, EditUser } from "@/api/user";
 export default {
   name: "addUser",
   components: { CityPicker },
@@ -61,9 +62,9 @@ export default {
       type: Boolean,
       default: false
     },
-    categoryData: {
-      type: Array,
-      default: () => []
+    editRowData: {
+      type: Object,
+      default: () => {}
     }
   },
   watch: {
@@ -83,7 +84,7 @@ export default {
         password: "",
         phone: "",
         region: "",
-        status: "0",
+        status: "2",
         role: []
       },
       formLabelWidth: "100px",
@@ -92,13 +93,15 @@ export default {
       rules: {
         username: [
           { validator: validateUserName, trigger: "blur" },
-          { required: true, message: "类型不能为空", trigger: "change" }
+          { required: true, message: "类型不能为空", trigger: "blur" }
         ],
         truename: [
-          { required: true, validator: validateTrueName, trigger: "blur" }
+          { required: true, message: "姓名不能为空", trigger: "blur" },
+          { validator: validateTrueName, trigger: "blur" }
         ],
         password: [
-          { required: true, validator: validateUserPassword, trigger: "blur" }
+          { required: true, message: "密码不能为空", trigger: "blur" },
+          { validator: validateUserPassword, trigger: "blur" }
         ],
         status: [
           { required: true, message: "请选择用户状态", trigger: "change" }
@@ -119,6 +122,25 @@ export default {
           this.roleData = res.data.data;
         })
         .catch();
+      // 初始值处理
+      let editRowData = this.editRowData;
+      if (editRowData.id) {
+        // 编辑
+        editRowData.role = editRowData.role.split(",");
+        for (let key in editRowData) {
+          this.form[key] = editRowData[key];
+          this.rules.password = [
+            { validator: validateUserPassword, trigger: "blur" }
+          ];
+        }
+      } else {
+        // 新增
+        this.rules.password = [
+          { required: true, message: "密码不能为空", trigger: "blur" },
+          { validator: validateUserPassword, trigger: "blur" }
+        ];
+        this.form.id && delete this.form.id;
+      }
     },
     // 关闭弹窗
     closeDialog() {
@@ -131,30 +153,50 @@ export default {
     },
     // 提交表单
     submit() {
-      this.submit_loading = true;
+      // this.submit_loading = true;
       this.$refs.addUserForm.validate(valid => {
         let params = JSON.parse(JSON.stringify(this.form));
         params.role = params.role.join();
+        console.log(params.password);
         params.region = JSON.stringify(this.cityPickerData);
-        console.log(params);
-        AddUser(params)
-          .then(res => {
-            this.$message({
-              type: "success",
-              message: res.data.message
+        if (!params.id) {
+          params.password = sha1(params.password);
+          AddUser(params)
+            .then(res => {
+              this.$message({
+                type: "success",
+                message: res.data.message
+              });
+              this.resetForm();
+            })
+            .catch(err => {
+              this.submit_loading = false;
             });
-            this.submit_loading = false;
-            this.dialogVisiable = false;
-            this.$emit("refreshUserTable");
-            this.resetForm();
-          })
-          .catch(err => {
-            this.submit_loading = false;
-          });
+        } else {
+          if (params.password) {
+            params.password = sha1(params.password);
+          } else {
+            delete params.password;
+          }
+          EditUser(params)
+            .then(res => {
+              this.$message({
+                type: "success",
+                message: res.data.message
+              });
+              this.resetForm();
+            })
+            .catch(err => {
+              this.submit_loading = false;
+            });
+        }
       });
     },
     // 清空表单
     resetForm() {
+      this.submit_loading = false;
+      this.dialogVisiable = false;
+      this.$emit("refreshUserTable");
       this.cityPickerData = null;
       this.$refs.addUserForm.resetFields();
     }

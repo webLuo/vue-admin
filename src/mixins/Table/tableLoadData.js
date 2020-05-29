@@ -26,7 +26,7 @@ const tableLoadData = {
             // 赋值
             this.tableData = data;
             // 数据统计
-            this.total = res.data.data.total;
+            this.total = res.data.data.total || data.length;
           }
         })
         .catch(error => { });

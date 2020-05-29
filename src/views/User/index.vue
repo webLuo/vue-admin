@@ -7,20 +7,20 @@
           <div class="wrap-content">
             <el-row :gutter="20">
               <el-col :span="3">
-                <SelectEle :config="configOptions" />
+                <SelectEle :config="configOptions" :selectData.sync="selectData" />
               </el-col>
               <el-col :span="4">
                 <el-input placeholder="请输入搜索的关键字"></el-input>
               </el-col>
               <el-col :span="16">
-                <el-button type="danger">搜索</el-button>
+                <el-button type="danger" @click="searchUser">搜索</el-button>
               </el-col>
             </el-row>
           </div>
         </div>
       </el-col>
       <el-col :span="4">
-        <el-button type="danger" class="pull-right" @click="dialog_add_user = true">添加用户</el-button>
+        <el-button type="danger" class="pull-right" @click="addUser">添加用户</el-button>
       </el-col>
     </el-row>
     <el-row>
@@ -31,7 +31,8 @@
             active-color="#13ce66"
             inactive-color="#ff4949"
             active-value="1"
-            inactive-value="0"
+            inactive-value="2"
+            @change="changeUserStatus(slotData.data)"
           ></el-switch>
         </template>
         <template v-slot:operation="slotData">
@@ -42,7 +43,12 @@
           <el-button size="mini" type="primary" @click="batchDeleteUser">批量删除</el-button>
         </template>
       </tableCmpt>
-      <addUserDialog :flag="dialog_add_user" @close="close" @refreshUserTable="refreshUserTable" />
+      <addUserDialog
+        :flag="dialog_add_user"
+        :editRowData="editRowData"
+        @close="close"
+        @refreshUserTable="refreshUserTable"
+      />
     </el-row>
   </div>
 </template>
@@ -50,7 +56,7 @@
 import SelectEle from "components/Select";
 import tableCmpt from "components/Table";
 import addUserDialog from "./dialog/add";
-import { DeleteUser } from "@/api/user";
+import { DeleteUser, UserActives } from "@/api/user";
 export default {
   name: "User",
   components: { SelectEle, tableCmpt, addUserDialog },
@@ -67,6 +73,7 @@ export default {
       configTable: {
         selection: true,
         recordCheckbox: true,
+        // 表头
         tHead: [
           {
             label: "邮箱/用户名",
@@ -114,7 +121,13 @@ export default {
         }
       },
       // 表格选中的数据
-      tableRowData: {}
+      tableRowData: {},
+      // 阻止switch状态
+      updateSwitchStatus: false,
+      // 要编辑的行数据
+      editRowData: {},
+      // 下拉菜单的数据
+      selectData: {}
     };
   },
   created() {},
@@ -128,6 +141,7 @@ export default {
     refreshUserTable() {
       this.$refs.userTable.getTableData();
     },
+    // 单条批量删除用户
     deleteUser(rowData) {
       let ids = [rowData.id];
       this.messageBoxFun({
@@ -139,8 +153,15 @@ export default {
         handleData: ids
       });
     },
+    //新增用户
+    addUser() {
+      this.dialog_add_user = true;
+      this.editRowData = Object.assign({});
+    },
+    // 编辑用户信息
     editUser(rowData) {
-      console.log(rowData.data.name);
+      this.dialog_add_user = true;
+      this.editRowData = Object.assign({}, rowData);
     },
     // 批量删除
     batchDeleteUser() {
@@ -165,11 +186,11 @@ export default {
     confirmDel(params) {
       DeleteUser({ id: params })
         .then(res => {
+          this.$refs.userTable.getTableData();
           this.$message({
             message: res.data.message,
             type: "success"
           });
-          this.$refs.userTable.getTableData();
         })
         .catch(err => {});
     },
@@ -179,6 +200,26 @@ export default {
         message: "取消删除",
         type: "info"
       });
+    },
+    // 修改用户状态
+    changeUserStatus(data) {
+      if (this.updateSwitchStatus) {
+        return false;
+      }
+      this.updateSwitchStatus = true;
+      UserActives({ id: data.id, status: data.status })
+        .then(res => {
+          this.$message({
+            message: res.data.message,
+            type: "success"
+          });
+          this.updateSwitchStatus = !this.updateSwitchStatus;
+        })
+        .catch(err => {});
+    },
+    // 查询用户
+    searchUser() {
+      console.log(this.selectData);
     }
   }
 };

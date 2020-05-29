@@ -55,3 +55,14 @@ export function DeleteUser(data) {
     data
   })
 }
+
+/**
+ * 用户禁启用
+ */
+export function UserActives(data) {
+  return service.request({
+    method: "post",
+    url: "/user/actives/",
+    data
+  })
+}
