@@ -74,6 +74,8 @@ export default {
       this.initOption = optionArr;
       // 初始化搜索类型
       this.selectValue = optionArr[0].value;
+      // 初始化下拉框查询参数
+      this.$emit("update:selectData", optionArr[0]);
     },
     // 选择后触发
     selectChange(val) {

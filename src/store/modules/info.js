@@ -1,4 +1,4 @@
-const app = {
+const info = {
   namespaced: true,
   state: {
     id: "" || sessionStorage.getItem("infoId"),
@@ -30,4 +30,4 @@ const app = {
   actions: {}
 }
 
-export default app;
+export default info;

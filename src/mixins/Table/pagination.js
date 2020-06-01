@@ -15,11 +15,11 @@ const tablePagination = {
   methods: {
     handleSizeChange(val) {
       this.tableConfig.requestData.data.pageSize = val;
-      this.getTableData()
+      this.refreshData()
     },
     handleCurrentChange(val) {
       this.tableConfig.requestData.data.pageNumber = val;
-      this.getTableData()
+      this.refreshData()
     }
   }
 }

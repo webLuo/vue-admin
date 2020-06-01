@@ -31,7 +31,7 @@
           <el-radio v-model="form.status" label="1">禁用</el-radio>
           <el-radio v-model="form.status" label="2">启用</el-radio>
         </el-form-item>
-        <el-form-item label="角色：" prop="role" :label-width="formLabelWidth">
+        <el-form-item label="系统：" prop="role" :label-width="formLabelWidth">
           <el-checkbox-group v-model="form.role">
             <el-checkbox v-for="item in roleData" :key="item.role" :label="item.name"></el-checkbox>
           </el-checkbox-group>
@@ -52,7 +52,7 @@ import {
   validateUserPassword
 } from "@/utils/validate";
 import CityPicker from "components/CityPicker";
-import { GetRole, AddUser, EditUser } from "@/api/user";
+import { GetRole, AddUser, EditUser, GetSystem } from "@/api/user";
 export default {
   name: "addUser",
   components: { CityPicker },
@@ -116,8 +116,8 @@ export default {
   methods: {
     // 弹窗打开
     addUserOpened() {
-      // 请求角色信息
-      GetRole()
+      // 请求角色信息  请求系统信息
+      GetSystem()
         .then(res => {
           this.roleData = res.data.data;
         })

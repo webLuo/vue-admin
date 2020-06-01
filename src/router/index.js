@@ -2,8 +2,19 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Layout from '@/views/Layout/index.vue'
 Vue.use(VueRouter);
+/**
+ * 动态路由
+ * 1.系统分配  多选配置
+ * 2.角色分配  单选配置
+ */
 
-const routes = [
+/**
+ * 1.默认路由
+ * 2.动态路由
+ */
+
+// 默认路由
+export const defaultRoutes = [
   {
     path: "/",
     redirect: "login",
@@ -22,9 +33,9 @@ const routes = [
     }
   },
   {
-    path: "/console",
+    path: "",
     name: "Console",
-    redirect: "index",
+    redirect: "dash",
     component: Layout,
     meta: {
       name: '控制台',
@@ -32,7 +43,7 @@ const routes = [
     },
     children: [
       {
-        path: "/index",
+        path: "/dash",
         name: "Index",
         component: () => import("@/views/Console/index.vue"),
         meta: {
@@ -41,11 +52,16 @@ const routes = [
       }
     ]
   },
+]
+
+// 动态路由
+export const asyncRoutes = [
   {
     path: "/info",
     name: "Info",
     component: Layout,
     meta: {
+      system: '信息功能', // 自定义属性
       name: '信息管理',
       icon: 'info'
     },
@@ -84,7 +100,8 @@ const routes = [
     component: Layout,
     meta: {
       name: '用户管理',
-      icon: 'user'
+      icon: 'user',
+      system: '用户功能'
     },
     children: [
       {
@@ -97,10 +114,10 @@ const routes = [
       }
     ]
   },
-];
+]
 
 const router = new VueRouter({
-  routes
+  routes: defaultRoutes
 });
 
 export default router;

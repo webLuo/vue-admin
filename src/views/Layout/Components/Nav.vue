@@ -48,6 +48,7 @@ export default {
   },
   mounted() {
     this.navMenuData = this.$router.options.routes;
+    console.log(this.navMenuData);
   },
   methods: {}
 };

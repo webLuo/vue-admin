@@ -1,5 +1,6 @@
 import { GetCategory } from "@/api/info";
-const app = {
+const common = {
+  namespaced: true,
   state: {},
   getters: {},
   mutations: {},
@@ -16,4 +17,4 @@ const app = {
   }
 }
 
-export default app;
+export default common;

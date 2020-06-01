@@ -10,7 +10,7 @@
                 <SelectEle :config="configOptions" :selectData.sync="selectData" />
               </el-col>
               <el-col :span="4">
-                <el-input placeholder="请输入搜索的关键字"></el-input>
+                <el-input v-model="keyWords" placeholder="请输入搜索的关键字" clearable></el-input>
               </el-col>
               <el-col :span="16">
                 <el-button type="danger" @click="searchUser">搜索</el-button>
@@ -30,8 +30,8 @@
             v-model="slotData.data.status"
             active-color="#13ce66"
             inactive-color="#ff4949"
-            active-value="1"
-            inactive-value="2"
+            active-value="2"
+            inactive-value="1"
             @change="changeUserStatus(slotData.data)"
           ></el-switch>
         </template>
@@ -62,13 +62,9 @@ export default {
   components: { SelectEle, tableCmpt, addUserDialog },
   data() {
     return {
+      keyWords: "", // 搜索关键字
       dialog_add_user: false,
       selestValue: "",
-      options: [
-        { value: "name", label: "姓名" },
-        { value: "phone", label: "手机号" },
-        { value: "email", label: "邮箱" }
-      ],
       configOptions: ["name", "phone", "email"],
       configTable: {
         selection: true,
@@ -139,7 +135,7 @@ export default {
     },
     // 新增刷新表格
     refreshUserTable() {
-      this.$refs.userTable.getTableData();
+      this.$refs.userTable.refreshData();
     },
     // 单条批量删除用户
     deleteUser(rowData) {
@@ -186,7 +182,7 @@ export default {
     confirmDel(params) {
       DeleteUser({ id: params })
         .then(res => {
-          this.$refs.userTable.getTableData();
+          this.$refs.userTable.refreshData();
           this.$message({
             message: res.data.message,
             type: "success"
@@ -219,7 +215,14 @@ export default {
     },
     // 查询用户
     searchUser() {
-      console.log(this.selectData);
+      let params = {
+        [this.selectData.value]: this.keyWords,
+        pageNumber: 1,
+        pageSize: 10
+      };
+      this.$refs.userTable.getTableDataParams(params);
+      // console.log(this.selectData);
+      // console.log(this.keyWords);
     }
   }
 };

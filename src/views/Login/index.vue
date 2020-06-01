@@ -252,7 +252,10 @@ export default {
           this.countDown(10);
         })
         .catch(error => {
-          console.log(error);
+          this.updateBtnSataus({
+            status: false,
+            text: "重新发送"
+          });
         });
     },
     // 提交表单
@@ -276,12 +279,12 @@ export default {
     loginSys() {
       let param = {
         username: this.ruleForm.userName,
-        // password: sha1(this.ruleForm.password),
-        password: this.ruleForm.password,
+        password: sha1(this.ruleForm.password),
+        // password: this.ruleForm.password,
         code: this.ruleForm.code
       };
       this.$store
-        .dispatch("login", param)
+        .dispatch("app/login", param)
         .then(response => {
           this.$message({
             type: "success",

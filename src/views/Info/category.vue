@@ -97,7 +97,7 @@ export default {
     // this.getCategoryData();
     // 只加载了父级
     // this.$store
-    //   .dispatch("getCategoryData")
+    //   .dispatch("common/getCategoryData")
     //   .then(res => {
     //     this.categoryData = res.data.data.data;
     //   })

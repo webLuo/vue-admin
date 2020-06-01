@@ -31,10 +31,10 @@ export default {
   mounted() {},
   methods: {
     navMenuState() {
-      this.$store.commit("SET_COLLAPSE");
+      this.$store.commit("app/SET_COLLAPSE");
     },
     exit() {
-      this.$store.dispatch("logout").then(() => {
+      this.$store.dispatch("app/logout").then(() => {
         this.$router.push({ name: "Login" });
       });
     }

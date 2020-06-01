@@ -13,6 +13,17 @@ export function GetRole(data = {}) {
 }
 
 /**
+ * 获取系统列表
+ */
+export function GetSystem(data = {}) {
+  return service.request({
+    method: "post",
+    url: "/system/",
+    data
+  })
+}
+
+/**
  * 获取用户列表
  */
 export function GetuserList(data = {}) {

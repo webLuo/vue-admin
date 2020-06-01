@@ -182,7 +182,7 @@ export default {
   mounted() {
     // 获取分类数据
     this.$store
-      .dispatch("getCategoryData")
+      .dispatch("common/getCategoryData")
       .then(res => {
         this.categoryData = res.data.data.data;
       })

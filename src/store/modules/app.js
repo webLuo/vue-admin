@@ -1,18 +1,21 @@
 import cookie from 'cookie_js';
-import { Login } from "@/api/login";
+import { Login, GetUserInfo } from "@/api/login";
 import { setToken, setUserName, getUserName, removeToken, removeUserName } from '@/utils/app';
 const app = {
+  namespaced: true,
   state: {
     isCollapse: false || JSON.parse(sessionStorage.getItem('isCollapse')),
     // isCollapse: JSON.parse(localStorage.getItem('isCollapse')) || false
     // isCollapse: JSON.parse(cookie.get('isCollapse')) || false
     token: '',
     username: getUserName() || '',
+    roles: []
   },
   getters: {
     // computed
     isCollapse: state => state.isCollapse,
-    username: state => state.username
+    username: state => state.username,
+    roles: state => state.roles
   },
   mutations: {
     SET_COLLAPSE(state) {
@@ -26,11 +29,14 @@ const app = {
     },
     SET_USERNAME(state, value) {
       state.username = value;
+    },
+    SET_ROLES(state, value) {
+      state.roles = value;
+      console.log(state.roles)
     }
   },
   actions: {
     login({ commit }, param) {
-      console.log(param)
       return new Promise((resolve, reject) => {
         Login(param).then((response) => {
           let data = response.data.data;
@@ -50,7 +56,22 @@ const app = {
         removeUserName()
         commit('SET_TOKEN', '');
         commit('SET_USERNAME', '');
+        commit('asyncRouter/RESET_ROUTERS', null, { root: true });
         resolve()
+      })
+    },
+    /**
+     * 获取用户信息
+     */
+    getUserInfo({ commit }) {
+      return new Promise((resolve, reject) => {
+        GetUserInfo({}).then(res => {
+          let data = res.data.data;
+          commit('SET_ROLES', data);
+          resolve(data)
+        }).catch(err => {
+
+        })
       })
     }
   }

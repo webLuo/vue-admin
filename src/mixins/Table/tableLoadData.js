@@ -6,28 +6,31 @@ const tableLoadData = {
   },
   created() { },
   mounted() {
-    this.getTableData()
+    this.refreshData()
   },
   methods: {
-    getTableData() {
-      let resParams = this.tableConfig.requestData;
+    // 刷新表格数据
+    refreshData() {
+      this.getTableData(this.tableConfig.requestData)
+    },
+    getTableDataParams(params) {
+      let requestData = Object.assign({}, params);
+      this.tableConfig.requestData.data = requestData;
+      this.getTableData(this.tableConfig.requestData);
+    },
+    getTableData(requestData) {
       let params = {
-        url: requestUrl[resParams.url],
-        method: resParams.method,
-        data: {
-          pageNumber: resParams.data.pageNumber,
-          pageSize: resParams.data.pageSize
-        }
+        url: requestUrl[requestData.url],
+        method: requestData.method,
+        data: requestData.data
       };
       loadTableData(params)
         .then(res => {
           let data = res.data.data.data;
-          if (data && data.length > 0) {
-            // 赋值
-            this.tableData = data;
-            // 数据统计
-            this.total = res.data.data.total || data.length;
-          }
+          // 赋值
+          this.tableData = data;
+          // 数据统计
+          this.total = res.data.data.total || data.length;
         })
         .catch(error => { });
     }
