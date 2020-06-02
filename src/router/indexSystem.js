@@ -4,8 +4,8 @@ import Layout from '@/views/Layout/index.vue'
 Vue.use(VueRouter);
 /**
  * 动态路由
- * 1.系统分配  多选配置 信息功能,用户功能
- * 2.角色分配  单选配置 业务员,技术员,部门经理
+ * 1.系统分配  多选配置
+ * 2.角色分配  单选配置
  */
 
 /**
@@ -61,7 +61,6 @@ export const asyncRoutes = [
     name: "Info",
     component: Layout,
     meta: {
-      role: ['业务员', '技术员', '部门经理'],
       system: '信息功能', // 自定义属性
       name: '信息管理',
       icon: 'info'
@@ -72,7 +71,6 @@ export const asyncRoutes = [
         name: "InfoIndex",
         component: () => import("@/views/Info/index.vue"),
         meta: {
-          role: ['部门经理'],
           name: '信息列表'
         }
       },
@@ -81,7 +79,6 @@ export const asyncRoutes = [
         name: "InfoCategory",
         component: () => import("@/views/Info/category.vue"),
         meta: {
-          role: ['技术员', '部门经理'],
           name: '信息分类'
         }
       },
@@ -91,7 +88,6 @@ export const asyncRoutes = [
         hidden: true,
         component: () => import("@/views/Info/infoDetail.vue"),
         meta: {
-          role: ['部门经理'],
           name: '信息详情'
         }
       }
@@ -103,7 +99,6 @@ export const asyncRoutes = [
     redirect: "index",
     component: Layout,
     meta: {
-      role: ['部门经理'],
       name: '用户管理',
       icon: 'user',
       system: '用户功能'
@@ -114,7 +109,6 @@ export const asyncRoutes = [
         name: "UserIndex",
         component: () => import("@/views/User/index.vue"),
         meta: {
-          role: ['部门经理'],
           name: '用户列表'
         }
       }

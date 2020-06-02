@@ -1,0 +1,248 @@
+<template>
+  <div>
+    <el-row :gutter="20">
+      <el-col :span="20">
+        <div class="label-wrap">
+          <label for>关键字：</label>
+          <div class="wrap-content">
+            <el-row :gutter="20">
+              <el-col :span="3">
+                <SelectEle :config="configOptions" :selectData.sync="selectData" />
+              </el-col>
+              <el-col :span="4">
+                <el-input v-model="keyWords" placeholder="请输入搜索的关键字" clearable></el-input>
+              </el-col>
+              <el-col :span="16">
+                <el-button type="danger" @click="searchUser">搜索</el-button>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="4">
+        <el-button type="danger" class="pull-right" @click="addUser">添加用户</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <tableCmpt :config="configTable" :tableRowData.sync="tableRowData" ref="userTable">
+        <template v-slot:status="slotData">
+          <el-switch
+            v-model="slotData.data.status"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            active-value="2"
+            inactive-value="1"
+            @change="changeUserStatus(slotData.data)"
+          ></el-switch>
+        </template>
+        <template v-slot:operation="slotData">
+          <el-button size="mini" type="danger" @click="deleteUser(slotData.data)">删除</el-button>
+          <el-button size="mini" type="success" @click="editUser(slotData.data)">编辑</el-button>
+        </template>
+        <template v-slot:batchDelBtn>
+          <el-button size="mini" type="primary" @click="batchDeleteUser">批量删除</el-button>
+        </template>
+      </tableCmpt>
+      <addUserDialog
+        :flag="dialog_add_user"
+        :editRowData="editRowData"
+        @close="close"
+        @refreshUserTable="refreshUserTable"
+      />
+    </el-row>
+  </div>
+</template>
+<script>
+import SelectEle from "components/Select";
+import tableCmpt from "components/Table";
+import addUserDialog from "./dialog/add";
+import { DeleteUser, UserActives } from "@/api/user";
+export default {
+  name: "User",
+  components: { SelectEle, tableCmpt, addUserDialog },
+  data() {
+    return {
+      keyWords: "", // 搜索关键字
+      dialog_add_user: false,
+      selestValue: "",
+      configOptions: ["name", "phone", "email"],
+      configTable: {
+        selection: true,
+        recordCheckbox: true,
+        // 表头
+        tHead: [
+          {
+            label: "邮箱/用户名",
+            field: "username",
+            width: "180"
+          },
+          {
+            label: "真实姓名",
+            field: "truename",
+            width: "180"
+          },
+          {
+            label: "手机号",
+            field: "phone"
+          },
+          {
+            label: "地区",
+            field: "region"
+          },
+          {
+            label: "角色",
+            field: "role"
+          },
+          {
+            label: "禁启用状态",
+            field: "status",
+            columnType: "slot",
+            slotName: "status"
+          },
+          {
+            label: "操作",
+            columnType: "slot",
+            slotName: "operation",
+            width: "220"
+          }
+        ],
+        // 请求接口URL
+        requestData: {
+          url: "getUserList",
+          method: "post",
+          data: {
+            pageNumber: 1,
+            pageSize: 10
+          }
+        }
+      },
+      // 表格选中的数据
+      tableRowData: {},
+      // 阻止switch状态
+      updateSwitchStatus: false,
+      // 要编辑的行数据
+      editRowData: {},
+      // 下拉菜单的数据
+      selectData: {}
+    };
+  },
+  created() {},
+  mounted() {},
+  methods: {
+    // 关闭新增弹框
+    close() {
+      this.dialog_add_user = false;
+    },
+    // 新增刷新表格
+    refreshUserTable() {
+      this.$refs.userTable.refreshData();
+    },
+    // 单条批量删除用户
+    deleteUser(rowData) {
+      let ids = [rowData.id];
+      this.messageBoxFun({
+        tip: "提示",
+        content: "确认删除当前信息,确认后无法恢复！",
+        tipType: "warning",
+        confirmFun: this.confirmDel,
+        cancelFun: this.cancelDel,
+        handleData: ids
+      });
+    },
+    //新增用户
+    addUser() {
+      this.dialog_add_user = true;
+      this.editRowData = Object.assign({});
+    },
+    // 编辑用户信息
+    editUser(rowData) {
+      this.dialog_add_user = true;
+      this.editRowData = Object.assign({}, rowData);
+    },
+    // 批量删除
+    batchDeleteUser() {
+      let ids = this.tableRowData.ids;
+      if (!ids || ids.length === 0) {
+        this.$message({
+          message: "请勾选需要删除的数据！",
+          type: "info"
+        });
+      } else {
+        this.messageBoxFun({
+          tip: "提示",
+          content: "确认删除当前信息,确认后无法恢复！",
+          tipType: "warning",
+          confirmFun: this.confirmDel,
+          cancelFun: this.cancelDel,
+          handleData: ids
+        });
+      }
+    },
+    // 确认删除
+    confirmDel(params) {
+      DeleteUser({ id: params })
+        .then(res => {
+          this.$refs.userTable.refreshData();
+          this.$message({
+            message: res.data.message,
+            type: "success"
+          });
+        })
+        .catch(err => {});
+    },
+    // 取消删除
+    cancelDel(params) {
+      this.$message({
+        message: "取消删除",
+        type: "info"
+      });
+    },
+    // 修改用户状态
+    changeUserStatus(data) {
+      if (this.updateSwitchStatus) {
+        return false;
+      }
+      this.updateSwitchStatus = true;
+      UserActives({ id: data.id, status: data.status })
+        .then(res => {
+          this.$message({
+            message: res.data.message,
+            type: "success"
+          });
+          this.updateSwitchStatus = !this.updateSwitchStatus;
+        })
+        .catch(err => {});
+    },
+    // 查询用户
+    searchUser() {
+      let params = {
+        [this.selectData.value]: this.keyWords,
+        pageNumber: 1,
+        pageSize: 10
+      };
+      this.$refs.userTable.getTableDataParams(params);
+      // console.log(this.selectData);
+      // console.log(this.keyWords);
+    }
+  }
+};
+</script>
+<style lang="scss" scoped>
+@import "../../styles/config.scss";
+.label-wrap {
+  @include labelDom(left, 60, 40);
+  margin-bottom: 15px;
+}
+</style>
+
+<!--
+初始化的数据，不需要监听
+可以在挂载之前预处理
+-->
+
+<!--
+v-slot插槽  父组件传内容到子组件显示
+1.匿名插槽  <slot></slot> 出现几次，显示几次，没有指定某一个，全部都显示
+2.具名插槽，指定插槽显示内容
+3.作用域插槽，可以进行数据绑定，父子组件通信,子组件将数据传给父组件，父组件对数据进行操作
+-->

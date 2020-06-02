@@ -32,7 +32,6 @@ const app = {
     },
     SET_ROLES(state, value) {
       state.roles = value;
-      console.log(state.roles)
     }
   },
   actions: {

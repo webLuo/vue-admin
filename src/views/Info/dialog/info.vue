@@ -47,7 +47,6 @@ export default {
     flag: {
       handler(newVal, oldVal) {
         this.dialogVisiable = newVal;
-        console.log(newVal);
       }
     }
   },

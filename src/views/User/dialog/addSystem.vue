@@ -117,7 +117,7 @@ export default {
     // 弹窗打开
     addUserOpened() {
       // 请求角色信息  请求系统信息
-      GetRole()
+      GetSystem()
         .then(res => {
           this.roleData = res.data.data;
         })

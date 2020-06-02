@@ -5,13 +5,10 @@ import { getToken, getUserName } from "./app"
 // 创建axios，赋给变量service
 // A总接口-http://www.web-jshtml.cn/productapi
 const BASEURL = process.env.NODE_ENV === "production" ? "" : "/devApi";
-console.log(BASEURL)
 const service = axios.create({
   baseURL: BASEURL,
   timeout: 5000
 });
-console.log(process.env.NODE_ENV);
-console.log(process.env.VUE_APP_ABC);
 // 添加请求拦截器
 /**
  * 请求接口前，做一些处理(请求拦截器)
