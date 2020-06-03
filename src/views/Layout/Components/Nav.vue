@@ -12,7 +12,7 @@
       active-text-color="#fff"
       router
     >
-      <template v-for="(item, index) in navMenuData">
+      <template v-for="(item, index) in menuData">
         <el-submenu :key="item.id" :index="index + ''" v-if="!item.hidden">
           <!--一级菜单-->
           <template slot="title">
@@ -34,21 +34,22 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "navMenu",
   data() {
-    return {
-      navMenuData: null
-    };
+    return {};
   },
   computed: {
     isCollapse: function() {
       return this.$store.state.app.isCollapse;
-    }
+    },
+    ...mapGetters("asyncRouter", {
+      //访问asyncRouter模块
+      menuData: "allRouters"
+    })
   },
-  mounted() {
-    this.navMenuData = this.$router.options.routes;
-  },
+  mounted() {},
   methods: {}
 };
 </script>

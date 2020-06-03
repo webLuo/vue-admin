@@ -13,6 +13,11 @@ import "./icons/index.js"
 
 // 路由守卫
 import './utils/premission'
+
+// 自定义按钮权限
+import { btnPermit } from './utils/btnPermit'
+
+Vue.prototype.btnPermit = btnPermit;
 Vue.use(global);
 Vue.use(ElementUI);
 Vue.config.productionTip = false;

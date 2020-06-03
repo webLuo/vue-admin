@@ -197,8 +197,8 @@ export default {
               type: "success"
             });
             // 可以节省网络资源，但是可能存在多人操作时，最优先还是通过请求的方式
-            this.categoryData.push(res.data.data);
-            // this.getCategoryData();
+            // this.categoryData.push(res.data.data);
+            this.getAllCategoryInfo();
           }
           this.submit_loading = false;
           this.$refs.categoryForm.resetFields();

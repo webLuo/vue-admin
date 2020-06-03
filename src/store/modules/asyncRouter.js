@@ -1,7 +1,7 @@
 import { defaultRoutes, asyncRoutes } from "@/router";
 function hasPermission(roles, route) {
   if (route.meta && route.meta.role) {
-    return roles.role.some(item => route.meta.role.indexOf(item) >= 0)
+    return roles.some(item => route.meta.role.indexOf(item) >= 0)
   }
 }
 function filterAsyncRoutes(asyncRoutes, roles) {
@@ -21,10 +21,12 @@ const asyncRouter = {
   state: {
     allRouters: defaultRoutes,
     addRouters: [],
+    btnPermit: []
   },
   getters: {
     allRouters: state => state.allRouters,
-    addRouters: state => state.addRouters
+    addRouters: state => state.addRouters,
+    btnPermit: state => state.btnPermit
   },
   mutations: {
     SET_ROUTER(state, value) {
@@ -34,15 +36,22 @@ const asyncRouter = {
     RESET_ROUTERS(state, value) {
       state.addRouters = null
       state.allRouters = defaultRoutes
+    },
+    SET_PREMIT_BTN(state, value) {
+      state.btnPermit = value;
     }
   },
   actions: {
     createRouter({ commit }, params) {
       return new Promise((resolve, reject) => {
-        let roles = params;
+        let roles = params.role;
+        let button = params.button; // 第一种通过公共方法用v-if设置按钮权限
+        let btnPerm = params.btnPerm; // 获取用户信息设置按钮权限
+        // commit("SET_PREMIT_BTN", button);
+        commit("SET_PREMIT_BTN", btnPerm);
         let addRouters = [];
         // 超管admin
-        if (roles.role.includes('admin')) {
+        if (roles.includes('admin')) {
           addRouters = asyncRoutes;
         } else {// 普通管理员
           addRouters = filterAsyncRoutes(asyncRoutes, roles)

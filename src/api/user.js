@@ -77,3 +77,14 @@ export function UserActives(data) {
     data
   })
 }
+
+/**
+ * 获取按钮权限
+ */
+export function GetPermButton(data) {
+  return service.request({
+    method: "post",
+    url: "/permButton/",
+    data
+  })
+}

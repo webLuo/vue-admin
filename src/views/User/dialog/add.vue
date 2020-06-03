@@ -31,10 +31,26 @@
           <el-radio v-model="form.status" label="1">禁用</el-radio>
           <el-radio v-model="form.status" label="2">启用</el-radio>
         </el-form-item>
-        <el-form-item label="系统：" prop="role" :label-width="formLabelWidth">
+        <el-form-item label="角色：" prop="role" :label-width="formLabelWidth">
           <el-checkbox-group v-model="form.role">
             <el-checkbox v-for="item in roleData" :key="item.role" :label="item.name"></el-checkbox>
           </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="按钮权限：" prop="btnPerm" :label-width="formLabelWidth">
+          <template v-if="btnPerm.length > 0">
+            <div v-for="item in btnPerm" :key="item.id">
+              <h4>{{item.name}}</h4>
+              <template v-if="item.perm && item.perm.length > 0">
+                <el-checkbox-group v-model="form.btnPerm">
+                  <el-checkbox
+                    v-for="btns in item.perm"
+                    :key="btns.value"
+                    :label="btns.value"
+                  >{{btns.name}}</el-checkbox>
+                </el-checkbox-group>
+              </template>
+            </div>
+          </template>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -52,7 +68,13 @@ import {
   validateUserPassword
 } from "@/utils/validate";
 import CityPicker from "components/CityPicker";
-import { GetRole, AddUser, EditUser, GetSystem } from "@/api/user";
+import {
+  GetRole,
+  AddUser,
+  EditUser,
+  GetSystem,
+  GetPermButton
+} from "@/api/user";
 export default {
   name: "addUser",
   components: { CityPicker },
@@ -85,11 +107,13 @@ export default {
         phone: "",
         region: "",
         status: "2",
-        role: []
+        role: [],
+        btnPerm: []
       },
       formLabelWidth: "100px",
       submit_loading: false,
-      roleData: [],
+      roleData: [], // 角色数据
+      btnPerm: [], // 按钮权限数据
       rules: {
         username: [
           { validator: validateUserName, trigger: "blur" },
@@ -121,12 +145,21 @@ export default {
         .then(res => {
           this.roleData = res.data.data;
         })
-        .catch();
+        .catch(err => {});
+      // 请求按钮权限
+      GetPermButton()
+        .then(res => {
+          this.btnPerm = res.data.data;
+        })
+        .catch(err => {});
       // 初始值处理
       let editRowData = this.editRowData;
       if (editRowData.id) {
         // 编辑
-        editRowData.role = editRowData.role.split(",");
+        editRowData.role = editRowData.role ? editRowData.role.split(",") : [];
+        editRowData.btnPerm = editRowData.btnPerm
+          ? editRowData.btnPerm.split(",")
+          : [];
         for (let key in editRowData) {
           this.form[key] = editRowData[key];
           this.rules.password = [
@@ -157,6 +190,7 @@ export default {
       this.$refs.addUserForm.validate(valid => {
         let params = JSON.parse(JSON.stringify(this.form));
         params.role = params.role.join();
+        params.btnPerm = params.btnPerm.join();
         params.region = JSON.stringify(this.cityPickerData);
         if (!params.id) {
           params.password = sha1(params.password);

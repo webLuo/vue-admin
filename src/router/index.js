@@ -72,7 +72,7 @@ export const asyncRoutes = [
         name: "InfoIndex",
         component: () => import("@/views/Info/index.vue"),
         meta: {
-          role: ['部门经理'],
+          role: ['业务员', '技术员', '部门经理'],
           name: '信息列表'
         }
       },
@@ -81,7 +81,7 @@ export const asyncRoutes = [
         name: "InfoCategory",
         component: () => import("@/views/Info/category.vue"),
         meta: {
-          role: ['技术员', '部门经理'],
+          role: ['业务员', '技术员', '部门经理'],
           name: '信息分类'
         }
       },
@@ -91,7 +91,7 @@ export const asyncRoutes = [
         hidden: true,
         component: () => import("@/views/Info/infoDetail.vue"),
         meta: {
-          role: ['部门经理'],
+          role: ['业务员', '技术员', '部门经理'],
           name: '信息详情'
         }
       }

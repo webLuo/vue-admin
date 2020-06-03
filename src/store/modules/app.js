@@ -55,6 +55,7 @@ const app = {
         removeUserName()
         commit('SET_TOKEN', '');
         commit('SET_USERNAME', '');
+        commit('SET_ROLES', []);
         commit('asyncRouter/RESET_ROUTERS', null, { root: true });
         resolve()
       })

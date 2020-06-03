@@ -59,7 +59,7 @@
         <el-button type="danger" @click="searchInfoList">搜索</el-button>
       </el-col>
       <el-col :span="3">
-        <el-button type="danger" class="pull-right" @click="dialog_info = true">新增</el-button>
+        <el-button type="danger" class="pull-right" @click="addInfo" v-if="btnPermit('info:add')">新增</el-button>
       </el-col>
     </el-row>
     <div class="black-space-15"></div>
@@ -85,12 +85,27 @@
       <!-- <el-table-column align="center" prop="content" label="内容"></el-table-column> -->
       <el-table-column align="center" label="操作" width="250">
         <template slot-scope="scope">
-          <el-button type="danger" size="mini" @click="deleteRow(scope.row)">删除</el-button>
-          <el-button type="success" size="mini" @click="editRow(scope.row)">编辑</el-button>
+          <el-button
+            type="danger"
+            size="mini"
+            @click="deleteRow(scope.row)"
+            v-if="btnPermit('info:del')"
+          >删除</el-button>
+          <el-button
+            type="success"
+            size="mini"
+            @click="editRow(scope.row)"
+            v-if="btnPermit('info:edit')"
+          >编辑</el-button>
           <!-- <router-link :to="{ name: 'InfoDetail', query: {id: scope.row.id}}">
             <el-button type="success" size="mini">编辑详情</el-button>
           </router-link>-->
-          <el-button type="success" size="mini" @click="editDetailRow(scope.row)">编辑详情</el-button>
+          <el-button
+            type="success"
+            size="mini"
+            @click="editDetailRow(scope.row)"
+            v-if="btnPermit('info:detailed')"
+          >编辑详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -98,7 +113,7 @@
     <!-- 底部分页 -->
     <el-row>
       <el-col :span="8">
-        <el-button @click="deleteBatch">批量删除</el-button>
+        <el-button @click="deleteBatch" v-if="btnPermit('info:batchDel')">批量删除</el-button>
       </el-col>
       <el-col :span="16">
         <el-pagination
@@ -192,6 +207,17 @@ export default {
     this.getList();
   },
   methods: {
+    // 新增信息
+    addInfo() {
+      if (this.categoryData && this.categoryData.length) {
+        this.dialog_info = true;
+      } else {
+        this.$message({
+          type: "info",
+          message: "请先创建信息分类！"
+        });
+      }
+    },
     getList() {
       // 表格数据加载状态
       this.table_loading = true;
@@ -353,6 +379,7 @@ export default {
     // 关闭新增弹框
     close() {
       this.dialog_info = false;
+      this.getList();
     },
     // 关闭编辑弹框
     closeEdit() {
